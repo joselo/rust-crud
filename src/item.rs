@@ -23,12 +23,20 @@ impl Item {
     COUNTER.fetch_add(1, Ordering::Relaxed)
   }
 
-  pub fn validate_item(item: &Item) -> Result<ValidatedItem, ItemValidationErr> {
-    Ok(
-      ValidatedItem {
-        name: Item::validate_name(String::from(&item.name))?
-      }
-    )
+  pub fn validate(item: &Item) -> Result<ValidatedItem, Vec<ItemValidationErr>> {
+    let mut errors = vec![];
+
+    let name = Item::validate_name(String::from(&item.name))
+      .unwrap_or_else(|e| {
+        errors.push(e);
+        String::from("")
+      });
+
+    if !errors.is_empty() {
+      return Err(errors);
+    }
+
+    Ok( ValidatedItem { name } )
   }
 
   fn validate_name(name: String) -> Result<String, ItemValidationErr> {

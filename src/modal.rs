@@ -27,7 +27,7 @@ pub struct Modal {
   pub visible: bool,
   pub on_close: Callback<bool>,
   pub on_save: Callback<Item>,
-  error: Option<ItemValidationErr>
+  error: Option<Vec<ItemValidationErr>>
 }
 
 pub enum ModalMsg {
@@ -64,7 +64,7 @@ impl Component for Modal {
         let mut item: Item = form_data.into();
         item.id = self.item.id;
 
-        let valid = Item::validate_item(&item);
+        let valid = Item::validate(&item);
 
         match valid {
           Ok(_v) => {
@@ -92,19 +92,22 @@ impl Component for Modal {
   fn view(&self) -> Html<Self> {
     let visible = if self.visible { "is-active" } else { "" };
 
-    let error = match self.error.as_ref() {
+    let error = |e: &ItemValidationErr| {
+      match e {
+        ItemValidationErr::InvalidName => html! { {"Enter some text"} }
+      }
+    };
+
+    let errors = match self.error.as_ref() {
       None => {
         html! {}
       }
 
-      Some(item_err) => {
-        match item_err {
-          ItemValidationErr::InvalidName => html! {
-            <div class="notification is-danger">
-              <button class="delete"></button>
-              {"Please enter some text"}
-            </div>
-          }
+      Some(errors) => {
+        html! {
+          <div class="notification is-danger">
+            {for errors.iter().map(error)}
+          </div>
         }
       }
     };
@@ -123,7 +126,7 @@ impl Component for Modal {
               <a onclick=|_| ModalMsg::HideModal class="delete" aria-label="close"></a>
             </header>
             <section class="modal-card-body">
-              {error}
+              {errors}
               <input value=&self.item.name name="name" class="input" autocomplete="off" />
             </section>
             <footer class="modal-card-foot">

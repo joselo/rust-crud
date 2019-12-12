@@ -8,10 +8,6 @@ mod modal;
 use crate::item::Item;
 use crate::modal::Modal;
 
-// use yew::services::{
-//   ConsoleService
-// };
-
 pub struct List {
   items: Vec<Item>,
   modal_visible: bool,
@@ -42,7 +38,6 @@ impl Component for List {
   }
 
   fn update(&mut self, msg: Self::Message) -> ShouldRender {
-    //let mut console = ConsoleService::new();
 
     match msg {
       Msg::New => {
@@ -76,7 +71,6 @@ impl Component for List {
         let item = self.items[idx].clone();
         self.current_item = Some(item);
         self.modal_visible = true;
-        //console.log("aa");
 
         true
       }
