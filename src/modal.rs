@@ -4,6 +4,7 @@ use stdweb::unstable::TryInto;
 use stdweb::web::{event::IEvent, Element, FormData};
 
 use crate::item::Item;
+use crate::item::ItemFormData;
 use crate::item::ItemValidationErr;
 
 use yew::services::{
@@ -61,15 +62,19 @@ impl Component for Modal {
       }
 
       ModalMsg::Save(form_data) => {
-        let mut item: Item = form_data.into();
-        item.id = self.item.id;
-
-        let valid = Item::validate(&item);
+        let form_data: ItemFormData = form_data.into();
+        let valid = ItemFormData::validate(&form_data);
 
         match valid {
           Ok(_v) => {
             self.visible = false;
-            self.on_save.emit(item);
+            self.on_save.emit(Item {
+              id: self.item.id,
+              name: form_data.name,
+              price: form_data.price.parse().unwrap(),
+              ..Default::default()
+            });
+
             console.log("Saved");
           },
           Err(e) => {
@@ -94,7 +99,16 @@ impl Component for Modal {
 
     let error = |e: &ItemValidationErr| {
       match e {
-        ItemValidationErr::InvalidName => html! { {"Enter some text"} }
+        ItemValidationErr::InvalidName => html! {
+          <div>
+            {"Name is required"}
+          </div>
+        },
+        ItemValidationErr::InvalidPrice => html! {
+          <div>
+            {"Invalid Price"}
+          </div>
+        }
       }
     };
 
@@ -127,7 +141,19 @@ impl Component for Modal {
             </header>
             <section class="modal-card-body">
               {errors}
-              <input value=&self.item.name name="name" class="input" autocomplete="off" />
+              <div class="field">
+                <label class="label">{"Name"}</label>
+                <div class="control">
+                <input value=&self.item.name name="name" class="input" autocomplete="off" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label">{"Price"}</label>
+                <div class="control">
+                <input value=&self.item.price name="price" class="input" autocomplete="off" />
+                </div>
+              </div>
             </section>
             <footer class="modal-card-foot">
               <button type="submit" class="button is-success">{"Save"}</button>

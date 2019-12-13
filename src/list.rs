@@ -106,6 +106,7 @@ impl Component for List {
               <tr>
                 <th>{"Id"}</th>
                 <th>{"Name"}</th>
+                <th>{"Price"}</th>
                 <th colspan="2"></th>
               </tr>
             </thead>
@@ -128,6 +129,7 @@ fn view_item((idx, item): (usize, &Item)) -> Html<List> {
     <tr>
       <td>{&item.id}</td>
       <td>{&item.name}</td>
+      <td>{&item.price}</td>
       <td><button onclick=|_| { Msg::Edit(idx) } type="button" class="button is-black">{"Edit"}</button></td>
       <td><button onclick=|_| { Msg::Remove(idx) } type="button" class="button is-danger">{"Remove"}</button></td>
     </tr>
