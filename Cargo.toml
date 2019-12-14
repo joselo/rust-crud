@@ -9,7 +9,9 @@ edition = "2018"
 [dependencies]
 yew = "0.10.0"
 stdweb = "0.4.20"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 
 [lib]
 name = "yew_dev_viewer"
-path = "src/list.rs"
+path = "src/model.rs"

@@ -1,7 +1,8 @@
 use stdweb::web::{FormData, FormDataEntry};
 use std::sync::atomic::{AtomicUsize, Ordering};
+use serde::{Serialize, Deserialize};
 
-#[derive(Default, Clone, PartialEq)]
+#[derive(Default, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Item {
   pub id: usize,
   pub name: String,
