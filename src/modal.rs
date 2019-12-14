@@ -150,13 +150,16 @@ impl Component for Modal {
 
               <div class="field">
                 <label class="label">{"Price"}</label>
-                <div class="control">
-                <input value=&self.item.price name="price" class="input" autocomplete="off" />
-                </div>
+                <p class="control has-icons-left has-icons-right">
+                  <input value=&self.item.price name="price" class="input" autocomplete="off" />
+                  <span class="icon is-small is-left">
+                    <i class="icon ion-md-cash"></i>
+                  </span>
+                </p>
               </div>
             </section>
             <footer class="modal-card-foot">
-              <button type="submit" class="button is-success">{"Save"}</button>
+              <button type="submit" class="button is-info">{"Save"}</button>
               <a onclick=|_| ModalMsg::HideModal class="button">{"Cancel"}</a>
             </footer>
           </form>

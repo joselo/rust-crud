@@ -127,24 +127,49 @@ impl Component for Model {
     html! {
       <>
         {modal}
-        <div class="container">
-          <table class="table is-hoverable is-fullwidth">
-            <thead>
-              <tr>
-                <th>{"Id"}</th>
-                <th>{"Name"}</th>
-                <th>{"Price"}</th>
-                <th colspan="2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {for self.state.items.iter().enumerate().map(view_item)}
-            </tbody>
-          </table>
-
-          <div>
-            <button onclick=|_| { Msg::New } type="button" class="button is-primary">{"Add"}</button>
+        <section class="hero is-small is-info is-bold">
+          <div class="hero-body">
+            <div class="container">
+              <p class="title">
+                {{ "Items" }}
+              </p>
+              <p class="subtitle">
+                {{"List of items"}}
+              </p>
+            </div>
           </div>
+        </section>
+        <main class="section">
+          <div class="container">
+            {{self.view_table()}}
+          </div>
+        </main>
+      </>
+    }
+  }
+
+}
+
+impl Model {
+  fn view_table(&self) -> Html<Self> {
+    html! {
+      <>
+        <table class="table is-hoverable is-fullwidth">
+          <thead>
+            <tr>
+              <th>{"Id"}</th>
+              <th>{"Name"}</th>
+              <th>{"Price"}</th>
+              <th colspan="2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {for self.state.items.iter().enumerate().map(view_item)}
+          </tbody>
+        </table>
+
+        <div>
+          <button onclick=|_| { Msg::New } type="button" class="button is-info">{"Add"}</button>
         </div>
       </>
     }
@@ -157,8 +182,9 @@ fn view_item((idx, item): (usize, &Item)) -> Html<Model> {
       <td>{&item.id}</td>
       <td>{&item.name}</td>
       <td>{&item.price}</td>
-      <td><button onclick=|_| { Msg::Edit(idx) } type="button" class="button is-black">{"Edit"}</button></td>
-      <td><button onclick=|_| { Msg::Remove(idx) } type="button" class="button is-danger">{"Remove"}</button></td>
+      <td><button onclick=|_| { Msg::Edit(idx) } type="button" class="button is-info is-outlined">{"Edit"}</button></td>
+      <td><button onclick=|_| { Msg::Remove(idx) } type="button" class="button is-danger is-outlined">{"Remove"}</button></td>
     </tr>
   }
 }
+
