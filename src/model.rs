@@ -14,7 +14,8 @@ const KEY: &'static str = "yew.rust.crud.database";
 
 pub struct Model {
   storage: StorageService,
-  state: List
+  state: List,
+  link: ComponentLink<Self>
 }
 
 pub struct List {
@@ -36,7 +37,7 @@ impl Component for Model {
   type Message = Msg;
   type Properties = ();
 
-  fn create(_: Self::Properties, _: ComponentLink<Self>) -> Self {
+  fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
     let storage = StorageService::new(Area::Local);
 
     let items = {
@@ -53,7 +54,7 @@ impl Component for Model {
       current_item: None
     };
 
-    Model { storage, state }
+    Model { storage, state, link }
   }
 
   fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -109,17 +110,17 @@ impl Component for Model {
     }
   }
 
-  fn view(&self) -> Html<Self> {
+  fn view(&self) -> Html {
     let modal = match self.state.current_item.as_ref() {
       None => {
         html! {
-          <Modal: item=Item { ..Default::default() } visible=self.state.modal_visible on_close=|_| { Msg::HiddedModal } on_save=Msg::Saved />
+          <Modal: item=Item { ..Default::default() } visible=self.state.modal_visible on_close=self.link.callback(|_| { Msg::HiddedModal }) on_save=self.link.callback(Msg::Saved) />
         }
       }
 
       Some(item) => {
         html! {
-          <Modal: item=item visible=self.state.modal_visible on_close=|_| { Msg::HiddedModal } on_save=Msg::Saved />
+          <Modal: item=item visible=self.state.modal_visible on_close=self.link.callback(|_| { Msg::HiddedModal }) on_save=self.link.callback(Msg::Saved) />
         }
       }
     };
@@ -151,7 +152,7 @@ impl Component for Model {
 }
 
 impl Model {
-  fn view_table(&self) -> Html<Self> {
+  fn view_table(&self) -> Html {
     html! {
       <>
         <table class="table is-hoverable is-fullwidth">
@@ -164,27 +165,27 @@ impl Model {
             </tr>
           </thead>
           <tbody>
-            {for self.state.items.iter().enumerate().map(view_item)}
+            {for self.state.items.iter().enumerate().map(|idx_itm| self.view_item(idx_itm))}
           </tbody>
         </table>
 
         <div>
-          <button onclick=|_| { Msg::New } type="button" class="button is-info">{"Add"}</button>
+          <button onclick=self.link.callback(|_| { Msg::New }) type="button" class="button is-info">{"Add"}</button>
         </div>
       </>
     }
   }
-}
 
-fn view_item((idx, item): (usize, &Item)) -> Html<Model> {
-  html! {
+  fn view_item(&self, (idx, item): (usize, &Item)) -> Html {
+    html! {
     <tr>
       <td>{&item.id}</td>
       <td>{&item.name}</td>
       <td>{&item.price}</td>
-      <td><button onclick=|_| { Msg::Edit(idx) } type="button" class="button is-info is-outlined">{"Edit"}</button></td>
-      <td><button onclick=|_| { Msg::Remove(idx) } type="button" class="button is-danger is-outlined">{"Remove"}</button></td>
+      <td><button onclick=self.link.callback(move |_| { Msg::Edit(idx) }) type="button" class="button is-info is-outlined">{"Edit"}</button></td>
+      <td><button onclick=self.link.callback(move |_| { Msg::Remove(idx) }) type="button" class="button is-danger is-outlined">{"Remove"}</button></td>
     </tr>
+  }
   }
 }
 

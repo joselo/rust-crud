@@ -11,7 +11,7 @@ use yew::services::{
   ConsoleService
 };
 
-#[derive(Properties)]
+#[derive(Properties, Clone)]
 pub struct ModalProperties {
   #[props(required)]
   pub item: Item,
@@ -28,7 +28,8 @@ pub struct Modal {
   pub visible: bool,
   pub on_close: Callback<bool>,
   pub on_save: Callback<Item>,
-  error: Option<Vec<ItemValidationErr>>
+  error: Option<Vec<ItemValidationErr>>,
+  link: ComponentLink<Self>
 }
 
 pub enum ModalMsg {
@@ -40,13 +41,14 @@ impl Component for Modal {
   type Message = ModalMsg;
   type Properties = ModalProperties;
 
-  fn create(prop: Self::Properties, _: ComponentLink<Self>) -> Self {
+  fn create(prop: Self::Properties, link: ComponentLink<Self>) -> Self {
     Self {
       item: prop.item,
       visible: prop.visible,
       on_close: prop.on_close,
       on_save: prop.on_save,
-      error: None
+      error: None,
+      link
     }
   }
 
@@ -94,7 +96,7 @@ impl Component for Modal {
     true
   }
 
-  fn view(&self) -> Html<Self> {
+  fn view(&self) -> Html {
     let visible = if self.visible { "is-active" } else { "" };
 
     let error = |e: &ItemValidationErr| {
@@ -130,14 +132,14 @@ impl Component for Modal {
       <div class=("modal", visible)>
         <div class="modal-background"></div>
         <div class="modal-card">
-          <form onsubmit=|e| {
+          <form onsubmit=self.link.callback(|e: yew::events::SubmitEvent| {
             e.prevent_default();
             let form_element: Element = e.target().unwrap().try_into().unwrap();
             ModalMsg::Save(FormData::from_element(&form_element).unwrap())
-          }>
+          })>
             <header class="modal-card-head">
               <p class="modal-card-title">{"New Item"}</p>
-              <a onclick=|_| ModalMsg::HideModal class="delete" aria-label="close"></a>
+              <a onclick=self.link.callback(|_| ModalMsg::HideModal) class="delete" aria-label="close"></a>
             </header>
             <section class="modal-card-body">
               {errors}
@@ -160,7 +162,7 @@ impl Component for Modal {
             </section>
             <footer class="modal-card-foot">
               <button type="submit" class="button is-info">{"Save"}</button>
-              <a onclick=|_| ModalMsg::HideModal class="button">{"Cancel"}</a>
+              <a onclick=self.link.callback(|_| ModalMsg::HideModal) class="button">{"Cancel"}</a>
             </footer>
           </form>
         </div>
