@@ -1,11 +1,9 @@
-use yew::prelude::*;
-use yew::{html, Component, ComponentLink, Html, ShouldRender};
-use stdweb::unstable::TryInto;
-use stdweb::web::{event::IEvent, Element, FormData};
+use yew::{html, Component, ComponentLink, Html, ShouldRender, Callback, Properties};
 
 use crate::item::Item;
 use crate::item::ItemFormData;
 use crate::item::ItemValidationErr;
+use crate::input::TextInput;
 
 use yew::services::{
   ConsoleService
@@ -13,18 +11,16 @@ use yew::services::{
 
 #[derive(Properties, Clone)]
 pub struct ModalProperties {
-  #[props(required)]
   pub item: Item,
-  #[props(required)]
   pub visible: bool,
-  #[props(required)]
   pub on_close: Callback<bool>,
-  #[props(required)]
   pub on_save: Callback<Item>
 }
 
 pub struct Modal {
   pub item: Item,
+  pub name: String,
+  pub price: String,
   pub visible: bool,
   pub on_close: Callback<bool>,
   pub on_save: Callback<Item>,
@@ -34,7 +30,9 @@ pub struct Modal {
 
 pub enum ModalMsg {
   HideModal,
-  Save(FormData)
+  SetName(String),
+  SetPrice(String),
+  Save
 }
 
 impl Component for Modal {
@@ -44,6 +42,8 @@ impl Component for Modal {
   fn create(prop: Self::Properties, link: ComponentLink<Self>) -> Self {
     Self {
       item: prop.item,
+      name: "".to_string(),
+      price: "".to_string(),
       visible: prop.visible,
       on_close: prop.on_close,
       on_save: prop.on_save,
@@ -53,8 +53,6 @@ impl Component for Modal {
   }
 
   fn update(&mut self, msg: Self::Message) -> ShouldRender {
-    let mut console = ConsoleService::new();
-
     match msg {
       ModalMsg::HideModal => {
         self.visible = false;
@@ -63,8 +61,20 @@ impl Component for Modal {
         true
       }
 
-      ModalMsg::Save(form_data) => {
-        let form_data: ItemFormData = form_data.into();
+      ModalMsg::SetName(name) => {
+        self.name = name;
+
+        true
+      }
+
+      ModalMsg::SetPrice(price) => {
+        self.price = price;
+
+        true
+      }
+
+      ModalMsg::Save => {
+        let form_data: ItemFormData = (self.name.clone(), self.price.clone()).into();
         let valid = ItemFormData::validate(&form_data);
 
         match valid {
@@ -77,7 +87,8 @@ impl Component for Modal {
               ..Default::default()
             });
 
-            console.log("Saved");
+            //self.error = None;
+            ConsoleService::info("Saved");
           },
           Err(e) => {
             self.error = Some(e)
@@ -90,8 +101,11 @@ impl Component for Modal {
   }
 
   fn change(&mut self, props: Self::Properties) -> ShouldRender {
+    self.name = props.item.name.clone();
+    self.price = props.item.price.to_string();
     self.item = props.item;
     self.visible = props.visible;
+    self.error = None;
 
     true
   }
@@ -128,17 +142,23 @@ impl Component for Modal {
       }
     };
 
+    let title = if self.item.name.is_empty() {
+      "New Item"
+    } else {
+      "Update Item"
+    };
+
     html! {
       <div class=("modal", visible)>
         <div class="modal-background"></div>
         <div class="modal-card">
-          <form onsubmit=self.link.callback(|e: yew::events::SubmitEvent| {
+          <form onsubmit=self.link.callback(|e: yew::events::FocusEvent| {
             e.prevent_default();
-            let form_element: Element = e.target().unwrap().try_into().unwrap();
-            ModalMsg::Save(FormData::from_element(&form_element).unwrap())
+
+            ModalMsg::Save
           })>
             <header class="modal-card-head">
-              <p class="modal-card-title">{"New Item"}</p>
+              <p class="modal-card-title">{title}</p>
               <a onclick=self.link.callback(|_| ModalMsg::HideModal) class="delete" aria-label="close"></a>
             </header>
             <section class="modal-card-body">
@@ -146,14 +166,14 @@ impl Component for Modal {
               <div class="field">
                 <label class="label">{"Name"}</label>
                 <div class="control">
-                <input value=&self.item.name name="name" class="input" autocomplete="off" />
+                <TextInput value=&self.name oninput=self.link.callback(|val: String| ModalMsg::SetName(val))/>
                 </div>
               </div>
 
               <div class="field">
                 <label class="label">{"Price"}</label>
                 <p class="control has-icons-left has-icons-right">
-                  <input value=&self.item.price name="price" class="input" autocomplete="off" />
+                  <TextInput value=&self.price oninput=self.link.callback(|val: String| ModalMsg::SetPrice(val))/>
                   <span class="icon is-small is-left">
                     <i class="icon ion-md-cash"></i>
                   </span>

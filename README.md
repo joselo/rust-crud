@@ -23,18 +23,18 @@ I'm still learning rust, so the app has some minor issues, but it general it wor
 
 ## Getting Started
 
-You need to [install Rust] and [cargo-web] then:
+You need to [install Rust] and [Trunk] then:
 
 ```bash
 $ git clone https://github.com/joselo/rust-crud
 $ cd rust-crud
-$ cargo web start --auto-reload
+$ trunk serve
 ```
 
-Then you can access the web server at `http://127.0.0.1:8000`.
+Then you can access the web server at `http://127.0.0.1:8080`.
 
 [install Rust]: https://www.rust-lang.org/tools/install
-[cargo-web]: https://github.com/koute/cargo-web
+[Trunk]: https://github.com/thedodd/trunk
 
 ## Authors
 
