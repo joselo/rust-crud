@@ -6,6 +6,7 @@ use yew::services::storage::{Area, StorageService};
 
 mod item;
 mod modal;
+mod input;
 
 use crate::item::Item;
 use crate::modal::Modal;
@@ -38,7 +39,7 @@ impl Component for Model {
   type Properties = ();
 
   fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
-    let storage = StorageService::new(Area::Local);
+    let storage = StorageService::new(Area::Local).expect("Storage Error");
 
     let items = {
       if let Json(Ok(items)) = storage.restore(KEY) {
@@ -108,6 +109,10 @@ impl Component for Model {
         false
       }
     }
+  }
+
+  fn change(&mut self, _props: Self::Properties) -> bool {
+    false
   }
 
   fn view(&self) -> Html {

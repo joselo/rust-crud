@@ -1,4 +1,3 @@
-use stdweb::web::{FormData, FormDataEntry};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use serde::{Serialize, Deserialize};
 
@@ -67,17 +66,10 @@ impl ItemFormData {
   }
 }
 
-impl From<FormData> for ItemFormData {
-  fn from(fd: FormData) -> Self {
-    let name = match fd.get("name").unwrap() {
-      FormDataEntry::String(name) => name,
-      _ => unreachable!()
-    };
-
-    let price = match fd.get("price").unwrap() {
-      FormDataEntry::String(price) => price,
-      _ => unreachable!()
-    };
+impl From<(String, String)> for ItemFormData {
+  fn from(fd: (String, String)) -> Self {
+    let name = fd.0;
+    let price = fd.1;
 
     Self {
       name,
